@@ -84,6 +84,17 @@ A static study guide. Every NUPOC topic gets a short equation sheet plus
 context, worked examples, and (for a handful) SVG diagrams — unit circle,
 FBD inclined plane, frustum slant. No AI calls; this is pure reference.
 
+### Responsive Layout
+Both the session workspace and study guide adapt below `md` (768px):
+- **Session**: chat and whiteboard collapse into a bottom tab switcher.
+  The fun fact becomes a full-panel overlay during evaluation, and the
+  view auto-flips to the whiteboard after TTFP completes.
+- **Teach Me**: the topic sidebar becomes a slide-out drawer triggered by
+  a "Topics" button.
+- **Dashboard**: the stats grid stacks to a single column.
+
+Desktop layout (the `ResizablePanelGroup` split) is unchanged at ≥ `md`.
+
 ## Repository Layout
 
 ```

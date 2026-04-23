@@ -182,7 +182,7 @@ export default function InterviewDashboard() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
       {!welcomeDismissed && (
         <div className="mb-6 rounded-lg border border-blue-500/30 bg-blue-500/10 p-5">
           <div className="flex items-start justify-between gap-4">
@@ -219,14 +219,14 @@ export default function InterviewDashboard() {
       )}
 
       <div className="mb-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-white">NR Interview Prep</h1>
-            <p className="text-slate-400 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">NR Interview Prep</h1>
+            <p className="text-slate-400 mt-1 text-sm sm:text-base">
               Socratic AI tutor for Naval Reactors interview prep
             </p>
           </div>
-          <div className="text-right">
+          <div className="sm:text-right">
             <div className="text-sm text-slate-500">Sessions completed</div>
             <div className="text-2xl font-bold text-emerald-400">
               {completedSessions.length}
@@ -234,7 +234,7 @@ export default function InterviewDashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-6">
           <div className="bg-[#1e293b] rounded-lg p-4 border border-[#334155]">
             <div className="text-slate-400 text-sm">Problems Attempted</div>
             <div className="text-xl font-bold text-white">{sessions.length}</div>
@@ -556,7 +556,7 @@ function SubjectCard({
   const totalSolved = subjectProblems.filter((p) => completedProblemIds.has(p.id)).length
 
   return (
-    <div className="bg-[#1e293b] rounded-xl p-6 border border-[#334155]">
+    <div className="bg-[#1e293b] rounded-xl p-4 sm:p-6 border border-[#334155]">
       <div className="flex items-baseline justify-between gap-3 flex-wrap mb-4">
         <h3 className="text-xl font-semibold text-white">{subject}</h3>
         <span className="text-xs text-slate-400">

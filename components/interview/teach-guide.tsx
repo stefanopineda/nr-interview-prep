@@ -8,6 +8,8 @@ import {
   ChevronDown,
   ChevronRight,
   Lightbulb,
+  Menu,
+  X,
 } from "lucide-react"
 import {
   SECTION_LABELS,
@@ -46,6 +48,7 @@ export function TeachGuide() {
   const [hydrated, setHydrated] = useState(false)
   const [readMoreOpen, setReadMoreOpen] = useState(false)
   const [examplesOpen, setExamplesOpen] = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   // Reset the two CTA expandables whenever the selected segment changes.
   // Rationale (per spec §6.3): every new segment should present its tight
@@ -111,7 +114,20 @@ export function TeachGuide() {
   function handleSelectSegment(section: TeachSection, segmentId: string) {
     setSelected({ section, segmentId })
     setExpanded((prev) => ({ ...prev, [section]: true }))
+    setMobileNavOpen(false)
   }
+
+  // Lock body scroll while the mobile drawer is open so taps don't leak through.
+  useEffect(() => {
+    if (typeof document === "undefined") return
+    if (mobileNavOpen) {
+      const prev = document.body.style.overflow
+      document.body.style.overflow = "hidden"
+      return () => {
+        document.body.style.overflow = prev
+      }
+    }
+  }, [mobileNavOpen])
 
   function handleToggleSection(section: TeachSection) {
     setExpanded((prev) => ({ ...prev, [section]: !prev[section] }))
@@ -150,14 +166,67 @@ export function TeachGuide() {
     selected.section === lastSection &&
     currentSegmentIndex === TEACH_CONTENT[lastSection].length - 1
 
+  const sidebarNav = (
+    <nav>
+      <ul className="space-y-1">
+        {SECTION_ORDER.map((section) => {
+          const isOpen = expanded[section]
+          const segments = TEACH_CONTENT[section]
+          return (
+            <li key={section}>
+              <button
+                type="button"
+                onClick={() => handleToggleSection(section)}
+                className="w-full flex items-center gap-1.5 px-2 py-2 md:py-1.5 rounded-md text-left text-sm font-medium text-slate-200 hover:bg-[#334155]/60 transition-colors"
+              >
+                {isOpen ? (
+                  <ChevronDown className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
+                ) : (
+                  <ChevronRight className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
+                )}
+                <span>{SECTION_LABELS[section]}</span>
+                <span className="ml-auto text-[10px] text-slate-500 font-normal">
+                  {segments.length}
+                </span>
+              </button>
+              {isOpen && (
+                <ul className="mt-0.5 ml-5 border-l border-[#334155] pl-2 space-y-0.5">
+                  {segments.map((seg) => {
+                    const isActive =
+                      selected.section === section && selected.segmentId === seg.id
+                    return (
+                      <li key={seg.id}>
+                        <button
+                          type="button"
+                          onClick={() => handleSelectSegment(section, seg.id)}
+                          className={`w-full text-left px-2 py-1.5 md:py-1 rounded text-xs transition-colors ${
+                            isActive
+                              ? "bg-blue-600/20 text-blue-300 border-l-2 border-blue-400 -ml-[2px] pl-[calc(0.5rem-2px)]"
+                              : "text-slate-400 hover:text-slate-200 hover:bg-[#334155]/40"
+                          }`}
+                        >
+                          {seg.title}
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+    </nav>
+  )
+
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <header className="mb-6">
+    <div className="mx-auto max-w-6xl px-4 py-6 md:py-8">
+      <header className="mb-4 md:mb-6">
         <div className="flex items-center gap-2 text-blue-400 text-sm mb-2">
           <BookOpen className="h-4 w-4" />
           <span className="uppercase tracking-wider font-medium">Study Guide</span>
         </div>
-        <h1 className="text-3xl font-bold text-white">
+        <h1 className="text-2xl md:text-3xl font-bold text-white">
           Key Concepts &mdash; NUPOC Interview Prep
         </h1>
         <p className="text-slate-400 text-sm mt-2 max-w-3xl">
@@ -175,59 +244,65 @@ export function TeachGuide() {
         </p>
       </header>
 
+      {/* Mobile: trigger for the topic drawer + current selection label. */}
+      <div className="md:hidden mb-3 flex items-center justify-between gap-2 bg-[#1e293b] border border-[#334155] rounded-lg px-3 py-2">
+        <div className="min-w-0 flex-1">
+          <div className="text-[10px] uppercase tracking-wider text-slate-500">
+            Viewing
+          </div>
+          <div className="text-sm text-slate-200 truncate">
+            {currentSegment ? currentSegment.title : "Select a topic"}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setMobileNavOpen(true)}
+          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-md bg-[#334155] text-slate-100 text-sm hover:bg-[#475569]"
+          aria-label="Open topic list"
+        >
+          <Menu className="h-4 w-4" />
+          <span>Topics</span>
+        </button>
+      </div>
+
+      {/* Mobile drawer — full-height slide-out. */}
+      {mobileNavOpen && (
+        <div className="md:hidden fixed inset-0 z-40" role="dialog" aria-modal="true">
+          <div
+            className="absolute inset-0 bg-black/60"
+            onClick={() => setMobileNavOpen(false)}
+            aria-hidden
+          />
+          <div className="absolute left-0 top-0 bottom-0 w-[85%] max-w-[320px] bg-[#1e293b] border-r border-[#334155] shadow-xl overflow-y-auto p-3 animate-in slide-in-from-left duration-200">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#334155]">
+              <div className="text-sm font-semibold text-slate-200">Topics</div>
+              <button
+                type="button"
+                onClick={() => setMobileNavOpen(false)}
+                className="p-1.5 rounded-md text-slate-400 hover:bg-[#334155] hover:text-white"
+                aria-label="Close topic list"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            {sidebarNav}
+            <div className="mt-4 pt-3 border-t border-[#334155]">
+              <Link
+                href="/interview"
+                className="block w-full text-center text-xs text-blue-400 hover:text-blue-300 py-2"
+                onClick={() => setMobileNavOpen(false)}
+              >
+                &rarr; Back to Interview Prep
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6">
-        {/* ─── Sidebar ─── */}
-        <aside className="bg-[#1e293b] border border-[#334155] rounded-xl p-3 h-fit md:sticky md:top-4">
-          <nav>
-            <ul className="space-y-1">
-              {SECTION_ORDER.map((section) => {
-                const isOpen = expanded[section]
-                const segments = TEACH_CONTENT[section]
-                return (
-                  <li key={section}>
-                    <button
-                      type="button"
-                      onClick={() => handleToggleSection(section)}
-                      className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded-md text-left text-sm font-medium text-slate-200 hover:bg-[#334155]/60 transition-colors"
-                    >
-                      {isOpen ? (
-                        <ChevronDown className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
-                      ) : (
-                        <ChevronRight className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
-                      )}
-                      <span>{SECTION_LABELS[section]}</span>
-                      <span className="ml-auto text-[10px] text-slate-500 font-normal">
-                        {segments.length}
-                      </span>
-                    </button>
-                    {isOpen && (
-                      <ul className="mt-0.5 ml-5 border-l border-[#334155] pl-2 space-y-0.5">
-                        {segments.map((seg) => {
-                          const isActive =
-                            selected.section === section && selected.segmentId === seg.id
-                          return (
-                            <li key={seg.id}>
-                              <button
-                                type="button"
-                                onClick={() => handleSelectSegment(section, seg.id)}
-                                className={`w-full text-left px-2 py-1 rounded text-xs transition-colors ${
-                                  isActive
-                                    ? "bg-blue-600/20 text-blue-300 border-l-2 border-blue-400 -ml-[2px] pl-[calc(0.5rem-2px)]"
-                                    : "text-slate-400 hover:text-slate-200 hover:bg-[#334155]/40"
-                                }`}
-                              >
-                                {seg.title}
-                              </button>
-                            </li>
-                          )
-                        })}
-                      </ul>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-          </nav>
+        {/* ─── Desktop sidebar ─── */}
+        <aside className="hidden md:block bg-[#1e293b] border border-[#334155] rounded-xl p-3 h-fit md:sticky md:top-4">
+          {sidebarNav}
 
           <div className="mt-4 pt-3 border-t border-[#334155]">
             <Link

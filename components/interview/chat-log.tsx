@@ -50,11 +50,7 @@ export default function ChatLog({ messages, streamingContent }: ChatLogProps) {
             {msg.role === "tutor" && (
               <div className="text-xs text-slate-500 mb-1 font-medium">NR Interviewer</div>
             )}
-            {msg.role === "tutor" ? (
-              <MarkdownWithMath>{msg.content}</MarkdownWithMath>
-            ) : (
-              <div className="whitespace-pre-wrap">{msg.content}</div>
-            )}
+            <MarkdownWithMath>{msg.content}</MarkdownWithMath>
           </div>
         </div>
       ))}

@@ -12,6 +12,7 @@ import {
   migrateLegacyPhases,
 } from "@/lib/interview/session-store"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { MarkdownWithMath } from "@/components/interview/markdown-with-math"
 
 const TIER_ORDER: ProblemTier[] = ["basic", "intermediate", "difficult", "capstone"]
 const TIER_LABELS: Record<ProblemTier, string> = {
@@ -93,9 +94,16 @@ const MAJOR_SPECIFIC_GROUPS = [
 
 const WELCOME_DISMISS_KEY = "nupoc_welcome_banner_dismissed_this_session"
 
-function truncate(text: string, maxLen = 140): string {
+// Truncates without severing a `$...$` math span: if the cut lands inside
+// math, back up to the last opening `$`. Keeps KaTeX rendering well-formed.
+function truncateMath(text: string, maxLen: number): string {
   if (text.length <= maxLen) return text
-  return text.slice(0, maxLen).trimEnd() + "…"
+  let slice = text.slice(0, maxLen)
+  const dollars = (slice.match(/\$/g) || []).length
+  if (dollars % 2 === 1) {
+    slice = slice.slice(0, slice.lastIndexOf("$"))
+  }
+  return slice.trimEnd() + "…"
 }
 
 export default function InterviewDashboard() {
@@ -287,7 +295,7 @@ export default function InterviewDashboard() {
                         </div>
                         {p && (
                           <div className="text-slate-300 text-sm mt-1.5 leading-snug">
-                            {truncate(p.prompt_text, 200)}
+                            <MarkdownWithMath>{truncateMath(p.prompt_text, 200)}</MarkdownWithMath>
                           </div>
                         )}
                         <div className="flex items-center gap-3 mt-2">
@@ -356,7 +364,7 @@ export default function InterviewDashboard() {
                         </div>
                         {p && (
                           <div className="text-slate-300 text-sm mt-1.5 leading-snug">
-                            {truncate(p.prompt_text, 220)}
+                            <MarkdownWithMath>{truncateMath(p.prompt_text, 220)}</MarkdownWithMath>
                           </div>
                         )}
                         <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">

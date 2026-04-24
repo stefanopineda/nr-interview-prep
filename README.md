@@ -228,9 +228,22 @@ If you want a text-only variant (cheaper, no vision spend), strip the
 `whiteboard_image` handling in `app/api/interview/evaluate/route.ts` and
 remove the `<Whiteboard>` component from `session-workspace.tsx`.
 
+## Voice Interview POC (experimental)
+
+An optional, fully voice-driven interviewer lives at **`/voice`**. It uses xAI
+end-to-end: TTS reads each question aloud, you draw your answer on the
+whiteboard, you record a verbal explanation, and Grok-4 Vision grades both the
+work and the transcript on conciseness, understanding, clarity, and presenting
+skill. Feedback is spoken back to you.
+
+Set `XAI_API_KEY` in `.env.local` (see `.env.example`) before hitting the
+route. The question bank under `lib/voice/problems.ts` is intentionally small
+(easy momentum / energy problems) for iterating on the voice loop itself.
+
 ## Security
 
 - `OPENAI_API_KEY` is **server-only** — never exposed to the browser.
+- `XAI_API_KEY` (optional, `/voice` only) is also server-only.
 - CSP locks `connect-src` to `'self'`; the client can only talk to our own
   API routes, which then talk to OpenAI server-side.
 - Candidate inputs to the AI are tag-delimited and length-capped to reduce
